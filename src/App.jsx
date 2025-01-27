@@ -3,6 +3,7 @@ import './App.css'
 import Search from './components/Search'
 import MovieCard from './components/MovieCard';
 import { useDebounce } from 'react-use';
+import { updateSearchCount } from './appwrite';
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 
@@ -46,6 +47,10 @@ const App = () => {
         setMovieList([])
       }
       setMovieList(data.results || []);
+
+      if(query && data.results.length > 0 ){
+        await updateSearchCount(query, data.results[0])
+      }
       
     } catch (error) {
       console.error(`error in getting movies: ${error}`);
