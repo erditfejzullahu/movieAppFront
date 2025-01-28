@@ -20,16 +20,27 @@ const API_OPTIONS = {
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [errorMessage, setErrorMessage] = useState(null)
-  const [movieList, setMovieList] = useState([])
-  const [trendingMovies, setTrendingMovies] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
+  const [movieList, setMovieList] = useState([])
+
+  const [trendingMovies, setTrendingMovies] = useState([])
+  const [trendingIsLoading, setTrendingIsLoading] = useState(false)
+  const [trendingErrorMessage, setTrendingErrorMessage] = useState('')
 
   useDebounce(() => setDebouncedSearchTerm(searchTerm), 500, [searchTerm])
   
   const fetchTrendingMovies = async () => {
-    const movies = await getTrendingMovies();
-    setTrendingMovies(movies);
+    setTrendingIsLoading(true);
+    setTrendingErrorMessage("");
+    try {
+      const movies = await getTrendingMovies();
+      setTrendingMovies(movies);
+    } catch (error) {
+      setTrendingErrorMessage("Error in fetching featured movies");
+    } finally {
+      setTrendingIsLoading(false);
+    }
   }
 
   const fetchMovies = async (query = '') => {
@@ -84,10 +95,13 @@ const App = () => {
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
         </header>
 
-        {trendingMovies.length > 0 && (
-          <section className="trending">
-            <h2>Trending Movies</h2>
-
+        <h2 className="mt-6">Trending Movies</h2>
+        {trendingIsLoading ? (
+          <p className="text-white py-2">Loading...</p>
+        ) : trendingErrorMessage ? (
+          <p className="text-red-500">{trendingErrorMessage}</p>
+        ) : (
+          <section className="trending mt-4">
             <ul>
               {trendingMovies.map((movie, index) => (
                 <li key={movie.$id}>
